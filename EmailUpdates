@@ -1,0 +1,65 @@
+import pandas as pd
+import smtplib
+from email.mime.text import MIMEText
+from email.message import EmailMessage
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+
+
+class email_update:
+    
+    def __init__(self):
+        pass
+        
+    def emails(self):
+    
+        smtp_ssl_host = 'smtp.gmail.com'
+        smtp_ssl_port = 465
+        username = ('EMAIL@EXAMPLE.COM')
+        password = ('PASSWORD')
+        sender = ('EMAIL@EXAMPLE.COM') # username and sender should be the same
+        targets = ['TARGET_EMAIL@EXAMPLE.COM'] # can list multiple emails with using commas: , 'Target#2@example.com'
+        msg = MIMEMultipart() # MIMEMultipart lets you add attachments, add a description, etc.
+        
+        msg['From'] = sender
+        msg['To'] = ', '.join(targets)
+        
+        # I used the '\n' purely because it formats better, it isn't neccessary to the program
+        msg['Subject'] = input('\n' + '1. What is the subject of the message?' + '\n' + '\n')
+        html = input('\n' + '2. What is the message of the email?' + '\n' + '\n') + '\n' + '\n'
+        part = MIMEText(html) # convert the string to MIMEText, it runs into an error otherwise
+        msg.attach(part)
+        
+        # Only sends a message if you choose "N"
+        sendImage = input('\n' + '3. Would you like to attach an image? (Y/N)' + '\n' + '\n')
+        while (sendImage != 'Y' and sendImage != 'N'): # Only accepts Y or N as inputs. All other inputs won't work.
+            sendImage = input('\n' + 'Error: wrong input. Please enter either "Y" or "N"' + '\n' + '\n')
+        if sendImage == 'Y':
+            name = input('\n' + '4. Give a description for the attachment' + '\n' + '\n') # gives a description for the attachment
+            file = MIMEText(name)
+            msg.attach(file)
+            # use the file path the image is located in. You can choose to remove the pre-entered path if the images are stored in various folders.
+            with open('Users/User/Directory/Folder/' + input('\n' + '5. What is image file name? (Include .png, .jpeg, etc.)' + '\n' + '\n'), 'rb') as img:
+                image = MIMEImage(img.read()) # converts the image to a MIMEImage.
+            msg.attach(image)
+            
+            second = input('\n' + 'Would you like to add another attachment?' + '\n' + '\n') # Gives the option to add another attachment
+            while (second != 'Y' and second != 'N'): 
+                second = input('\n' + 'Error: wrong input. Please enter either "Y" or "N"' + '\n' + '\n')
+            if second == 'Y':
+                name = input('\n' + '4. Give a description for the attachment' + '\n' + '\n')
+                file = MIMEText(name)
+                msg.attach(file)
+                with open('Users/User/Directory/Folder/' + input('\n' + '5. What is image file name? (Include .png, .jpeg, etc.)' + '\n' + '\n'), 'rb') as img:
+                    image = MIMEImage(img.read()) 
+                msg.attach(image)
+            else:
+                None
+        else:
+            None
+
+        server = smtplib.SMTP_SSL(smtp_ssl_host, smtp_ssl_port)
+        server.login(username, password)
+        server.sendmail(sender, targets, msg.as_string())
+        server.quit()
+        
