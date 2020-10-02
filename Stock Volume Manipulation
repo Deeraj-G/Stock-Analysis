@@ -1,0 +1,58 @@
+import matplotlib.pyplot as plt
+import yfinance as yf
+from datetime import *
+import dateutil.relativedelta
+import datetime
+import pandas as pd
+import mplcursors
+import matplotlib
+import matplotlib.dates as mdates
+from dateutil import parser
+import numpy as np
+import smtplib
+from ipynb.fs.defs.EmailUpdates import email_update
+import os
+
+
+MONTH_CUTTOFF = 1
+
+class volume:
+
+    def __init__(self):
+        pass
+    
+    def getData(self, ticker): #finds the stock volume of a specific stock using its ticker
+        global MONTH_CUTOFF
+        currentDate = datetime.date.today() + datetime.timedelta(days=1)
+        pastDate = currentDate - \
+            dateutil.relativedelta.relativedelta(months=MONTH_CUTTOFF)
+        sys.stdout = open(os.devnull, "w")
+        data = yf.download(ticker, pastDate, currentDate)
+        sys.stdout = sys.__stdout__
+        return data[["Volume"]]
+    
+    def lineGraph(self, data): #creates a line graph representing the data
+        data.reset_index(level=0, inplace=True)
+        fig, ax = plt.subplots(figsize=(15, 7))
+        ax.plot(data['Date'], data['Volume'])
+        ax.get_yaxis().set_major_formatter(
+            matplotlib.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
+        mplcursors.cursor(hover=True)
+        currentDate = datetime.datetime.strptime(
+            date.today().strftime("%Y-%m-%d"), "%Y-%m-%d")
+        pastDate = currentDate - dateutil.relativedelta.relativedelta(months=4)
+        plt.savefig(input('\n' + 'What would you like to name the line graph?' + '\n' + '\n'))
+        display = input('\n' + 'Do you wish to display the graph? (Y/N)' + '\n' + '\n')
+        while (display != 'Y' and display != 'N'):
+            display = input('\n' + 'Error: wrong input. Please enter either "Y" or "N"' + '\n' + '\n')
+        if display == 'Y':
+            plt.show()
+        else:
+            plt.close()
+            
+    def sendGraph(self):
+        input('\n' + 'Which function would you like to email: getData or lineGraph?' + '\n' + '\n')
+        data = self.getData(input('\n' + 'What stock do you want to find?' + '\n' + '\n'))
+        self.lineGraph(data)
+        email_update().emails()
+            
